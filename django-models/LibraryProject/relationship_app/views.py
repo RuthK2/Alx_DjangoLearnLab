@@ -3,7 +3,8 @@ from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from .models import Book
 from .models import Library
@@ -41,24 +42,14 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('login')
-
 def is_admin(user):
-    try:
-        return user.userprofile.role == 'Admin'
-    except:
-        return False
+    return user.userprofile.role == 'Admin'
 
 def is_librarian(user):
-    try:
-        return user.userprofile.role == 'Librarian'
-    except:
-        return False
+    return user.userprofile.role == 'Librarian'
 
 def is_member(user):
-    try:
-        return user.userprofile.role == 'Member'
-    except:
-        return False
+    return user.userprofile.role == 'Member'
 
 @user_passes_test(is_admin)
 def admin_view(request):
