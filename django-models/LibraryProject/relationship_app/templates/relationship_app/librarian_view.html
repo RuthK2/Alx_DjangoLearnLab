@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Librarian Dashboard</title>
+</head>
+<body>
+    <h1>Librarian Dashboard</h1>
+    <p>Welcome, {{ user.username }}! You have librarian access.</p>
+    
+    <h2>Librarian Functions:</h2>
+    <ul>
+        <li>Add and edit books</li>
+        <li>Manage book checkouts</li>
+        <li>View member information</li>
+        <li>Generate library reports</li>
+    </ul>
+    
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
