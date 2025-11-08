@@ -31,7 +31,7 @@ class Librarian(models.Model):
         return self.name
     
 class UserProfile(models.Model):
-    ROLE_CHOICES = [
+    ROLE_CHOICES = [   
         ('Admin', 'Admin'),
         ('Librarian', 'Librarian'),
         ('Member', 'Member'),
@@ -51,5 +51,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
+
 
 # Create your models here.
