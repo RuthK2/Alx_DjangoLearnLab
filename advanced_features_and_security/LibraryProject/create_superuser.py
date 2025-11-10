@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LibraryProject.settings')
 django.setup()
 
-from relationship_app.models import CustomUser
+from bookshelf.models import CustomUser
 
 # Create superuser
 if not CustomUser.objects.filter(email='admin@example.com').exists():
