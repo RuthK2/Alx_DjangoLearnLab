@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.decorators import permission_required
@@ -30,6 +31,10 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            # Safe redirect to prevent path traversal
+            next_url = request.POST.get('next', '')
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
             return redirect('list_books')
     else:
         form = UserCreationForm()
@@ -40,9 +45,9 @@ def profile(request):
     return render(request, 'relationship_app/profile.html')
 
 def logout_view(request):
-    from django.contrib.auth import logout
     logout(request)
     return redirect('login')
+
 def is_admin(user):
     return user.userprofile.role == 'Admin'
 

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Member Dashboard</title>
+</head>
+<body>
+    <h1>Member Dashboard</h1>
+    <p>Welcome, {{ user.username }}! You are a library member.</p>
+    
+    <h2>Member Functions:</h2>
+    <ul>
+        <li>Browse available books</li>
+        <li>View your borrowed books</li>
+        <li>Search library catalog</li>
+        <li>Update your profile</li>
+    </ul>
+    
+    <a href="{% url 'list_books' %}">Browse Books</a> | 
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
