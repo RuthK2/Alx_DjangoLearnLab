@@ -1,0 +1,9 @@
+<h1>Books</h1>
+{% for book in books %}
+    <p>{{ book.title }} by {{ book.author }} ({{ book.publication_year }})
+       <a href="{% url 'bookshelf:detail' book.pk %}">View</a> |
+       <a href="{% url 'bookshelf:edit' book.pk %}">Edit</a> |
+       <a href="{% url 'bookshelf:delete' book.pk %}">Delete</a>
+    </p>
+{% endfor %}
+<a href="{% url 'bookshelf:create' %}">Add Book</a>
