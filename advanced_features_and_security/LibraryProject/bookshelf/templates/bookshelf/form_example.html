@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Form Example</title>
+</head>
+<body>
+    <h1>Secure Example Form</h1>
+    
+    <!-- Security: Form with CSRF protection and Django form validation -->
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="errors">
+                <h3>Please correct the following errors:</h3>
+                {{ form.errors }}
+            </div>
+        {% endif %}
+        
+        <div>
+            <label for="{{ form.name.id_for_label }}">Name:</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <span class="error">{{ form.name.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.email.id_for_label }}">Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <span class="error">{{ form.email.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.message.id_for_label }}">Message:</label>
+            {{ form.message }}
+            {% if form.message.errors %}
+                <span class="error">{{ form.message.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
