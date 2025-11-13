@@ -36,33 +36,35 @@ DEBUG = get_debug_setting()
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-# Security Headers - Protect against common web vulnerabilities
-SECURE_BROWSER_XSS_FILTER = True  # Enable browser XSS filtering
-SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
-X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking attacks
+# ============================================================================
+# HTTPS AND SECURITY CONFIGURATION
+# ============================================================================
 
-# Cookie Security - Ensure cookies are only sent over HTTPS in production
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
-SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+# Step 1: HTTPS Enforcement Settings
+# Redirect all non-HTTPS requests to HTTPS
+SECURE_SSL_REDIRECT = not DEBUG  # Enable in production (when DEBUG=False)
 
-# HSTS (HTTP Strict Transport Security) - Force HTTPS connections
-def get_hsts_seconds():
-    try:
-        return int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
-    except ValueError:
-        return 0
+# HTTP Strict Transport Security (HSTS) - Force browsers to use HTTPS
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG  # Apply HSTS to all subdomains
+SECURE_HSTS_PRELOAD = not DEBUG  # Allow preloading in browser HSTS lists
 
-def get_bool_env(key, default='False'):
-    return os.environ.get(key, default).lower() == 'true'
-
-SECURE_HSTS_SECONDS = get_hsts_seconds()
-SECURE_HSTS_PRELOAD = get_bool_env('SECURE_HSTS_PRELOAD')
-SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool_env('SECURE_HSTS_INCLUDE_SUBDOMAINS')
-
-# HTTP-Only Cookies - Prevent JavaScript access to cookies
+# Step 2: Secure Cookie Configuration
+# Ensure session cookies are only transmitted over HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # Enable in production
+# Ensure CSRF cookies are only transmitted over HTTPS
+CSRF_COOKIE_SECURE = not DEBUG  # Enable in production
+# Prevent JavaScript access to cookies (XSS protection)
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
+
+# Step 3: Security Headers Implementation
+# Prevent clickjacking attacks by denying framing
+X_FRAME_OPTIONS = 'DENY'
+# Prevent MIME type sniffing attacks
+SECURE_CONTENT_TYPE_NOSNIFF = True
+# Enable browser's built-in XSS filtering
+SECURE_BROWSER_XSS_FILTER = True
 
 
 
