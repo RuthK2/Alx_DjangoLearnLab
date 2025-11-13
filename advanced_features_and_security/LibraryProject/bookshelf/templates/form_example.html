@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Form Example</title>
+</head>
+<body>
+    <h1>Secure Book Form Example</h1>
+    
+    <!-- Security: Form with CSRF protection and Django form validation -->
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="errors">
+                <h3>Please correct the following errors:</h3>
+                {{ form.errors }}
+            </div>
+        {% endif %}
+        
+        <div>
+            <label for="{{ form.title.id_for_label }}">Title:</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <span class="error">{{ form.title.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.author.id_for_label }}">Author:</label>
+            {{ form.author }}
+            {% if form.author.errors %}
+                <span class="error">{{ form.author.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.publication_year.id_for_label }}">Publication Year:</label>
+            {{ form.publication_year }}
+            {% if form.publication_year.errors %}
+                <span class="error">{{ form.publication_year.errors }}</span>
+            {% endif %}
+        </div>
+        
+        <button type="submit">Save Book</button>
+        <a href="{% url 'bookshelf:list' %}">Cancel</a>
+    </form>
+    
+    <!-- Security Features Implemented:
+         1. CSRF Token - Protects against Cross-Site Request Forgery
+         2. Django Form Validation - Automatic input sanitization and validation
+         3. Error Display - Shows validation errors to users
+         4. XSS Protection - Template variables are auto-escaped
+         5. Safe URL Generation - Uses url template tag
+    -->
+</body>
+</html>
