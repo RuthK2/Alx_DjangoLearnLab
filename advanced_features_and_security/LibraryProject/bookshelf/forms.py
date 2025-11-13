@@ -1,6 +1,12 @@
 from django import forms
 from .models import Book
 
+class ExampleForm(forms.Form):
+    """Example form demonstrating secure form practices."""
+    name = forms.CharField(max_length=100)
+    email = forms.EmailField()
+    message = forms.CharField(widget=forms.Textarea)
+
 class BookForm(forms.ModelForm):
     """
     Secure form for Book model with built-in validation and CSRF protection.
