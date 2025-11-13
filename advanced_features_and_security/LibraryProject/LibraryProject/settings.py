@@ -66,6 +66,20 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Enable browser's built-in XSS filtering
 SECURE_BROWSER_XSS_FILTER = True
 
+# Proxy SSL Header - For deployment behind reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Additional Security Headers
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+SECURE_PERMISSIONS_POLICY = {
+    'geolocation': [],
+    'microphone': [],
+    'camera': [],
+    'payment': [],
+    'usb': [],
+}
+
 
 
 # Application definition
