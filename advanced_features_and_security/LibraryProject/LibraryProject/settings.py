@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,49 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ew!v@ohsqt44&(=%qi47z)z6i48(7*l^+76-1$jb*6x_$mda1&'
+def get_secret_key():
+    key = os.environ.get('SECRET_KEY')
+    return key if key else 'django-insecure-ew!v@ohsqt44&(=%qi47z)z6i48(7*l^+76-1$jb*6x_$mda1&'
+
+SECRET_KEY = get_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+def get_debug_setting():
+    debug_value = os.environ.get('DEBUG', 'False')
+    return debug_value.lower() == 'true' if debug_value else False
 
-ALLOWED_HOSTS = []
+DEBUG = get_debug_setting()
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+# Security Headers - Protect against common web vulnerabilities
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser XSS filtering
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking attacks
+
+# Cookie Security - Ensure cookies are only sent over HTTPS in production
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+
+# HSTS (HTTP Strict Transport Security) - Force HTTPS connections
+def get_hsts_seconds():
+    try:
+        return int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    except ValueError:
+        return 0
+
+def get_bool_env(key, default='False'):
+    return os.environ.get(key, default).lower() == 'true'
+
+SECURE_HSTS_SECONDS = get_hsts_seconds()
+SECURE_HSTS_PRELOAD = get_bool_env('SECURE_HSTS_PRELOAD')
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool_env('SECURE_HSTS_INCLUDE_SUBDOMAINS')
+
+# HTTP-Only Cookies - Prevent JavaScript access to cookies
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
 
 
 # Application definition
@@ -50,6 +88,20 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Content Security Policy - Prevent XSS attacks by controlling resource loading
+try:
+    import csp
+    MIDDLEWARE.insert(1, 'csp.middleware.CSPMiddleware')
+except ImportError:
+    pass
+
+# CSP Directives - Define allowed sources for different content types
+CSP_DEFAULT_SRC = ("'self'",)  # Default policy: only same origin
+CSP_SCRIPT_SRC = ("'self'",)  # Scripts: only from same origin
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'",)  # Styles: same origin + inline
+CSP_FONT_SRC = ("'self'",)  # Fonts: only from same origin
+CSP_IMG_SRC = ("'self'", "data:",)  # Images: same origin + data URLs
 
 ROOT_URLCONF = 'LibraryProject.urls'
 
