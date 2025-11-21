@@ -17,7 +17,7 @@ class BookViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+          permission_classes = [IsAdminUser]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
