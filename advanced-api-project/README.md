@@ -1,43 +1,53 @@
 # Advanced API Project - Django REST Framework
 
 ## Overview
-This project implements a RESTful API using Django REST Framework with custom views for CRUD operations on Book and Author models.
+This project implements a RESTful API using Django REST Framework with custom views for CRUD operations on Book and Author models, including advanced query capabilities.
 
 ## API Endpoints
 
 ### Books
-- `GET /api/books/` - List all books (public access)
+- `GET /api/books/` - List all books with filtering, search, and ordering
 - `GET /api/books/<id>/` - Retrieve single book (public access)
 - `POST /api/books/create/` - Create new book (authentication required)
-- `PUT /api/books/<id>/update/` - Update existing book (authentication required)
-- `DELETE /api/books/<id>/delete/` - Delete book (authentication required)
+- `PUT /api/books/update/` - Update existing book (authentication required)
+- `DELETE /api/books/delete/` - Delete book (authentication required)
+
+## Advanced Query Features
+
+### Filtering
+Filter books by specific fields:
+- `GET /api/books/?title=Harry Potter` - Filter by exact title
+- `GET /api/books/?author__name=J.K. Rowling` - Filter by author name
+- `GET /api/books/?publication_year=1997` - Filter by publication year
+
+### Search
+Search across title and author fields:
+- `GET /api/books/?search=Harry` - Search for "Harry" in title or author name
+
+### Ordering
+Order results by any field:
+- `GET /api/books/?ordering=title` - Order by title (ascending)
+- `GET /api/books/?ordering=-publication_year` - Order by year (descending)
+- `GET /api/books/?ordering=title,publication_year` - Multiple field ordering
+
+### Combined Queries
+Combine filtering, search, and ordering:
+- `GET /api/books/?search=Potter&ordering=-publication_year&author__name=J.K. Rowling`
 
 ## View Configurations
 
 ### BookList (ListAPIView)
-- **Purpose**: Retrieve all books
+- **Purpose**: Retrieve all books with advanced query capabilities
 - **Permissions**: IsAuthenticatedOrReadOnly (public read access)
-- **Custom Features**: None
+- **Features**: 
+  - Filtering by title, author name, publication year
+  - Search across title and author name
+  - Ordering by title and publication year
+  - Default ordering by title
 
-### BookDetail (RetrieveAPIView)
-- **Purpose**: Retrieve single book by ID
-- **Permissions**: IsAuthenticatedOrReadOnly (public read access)
-- **Custom Features**: None
-
-### BookCreate (CreateAPIView)
-- **Purpose**: Create new book instances
-- **Permissions**: IsAuthenticated (requires login)
-- **Custom Features**: Automatic data validation via serializer
-
-### BookUpdate (UpdateAPIView)
-- **Purpose**: Update existing book instances
-- **Permissions**: IsAuthenticated (requires login)
-- **Custom Features**: Partial updates supported
-
-### BookDelete (DestroyAPIView)
-- **Purpose**: Delete book instances
-- **Permissions**: IsAuthenticated (requires login)
-- **Custom Features**: Soft delete not implemented
+### Authentication
+Get token: `POST /api/auth/token/` with username/password
+Use token: `Authorization: Token YOUR_TOKEN_HERE`
 
 ## Models
 - **Author**: Basic author information with name field

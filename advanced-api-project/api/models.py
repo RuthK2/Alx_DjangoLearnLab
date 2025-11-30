@@ -21,7 +21,9 @@ class Book(models.Model):
             MaxValueValidator(get_max_year())
         ]
     )  # Year published with validation
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')  # One-to-many relationship
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books') 
+     # One-to-many relationship
     
     def __str__(self):
         return self.title
+    
