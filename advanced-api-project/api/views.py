@@ -17,6 +17,7 @@ class BookList(generics.ListAPIView):
 
 # DetailView for retrieving a single book by ID - allows read-only access for unauthenticated users
 class BookDetail(generics.RetrieveAPIView):
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
