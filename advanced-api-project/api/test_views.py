@@ -61,6 +61,18 @@ class BookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Book.objects.count(), 3)
     
+    def test_book_create_with_login(self):
+        """Test creating a book using session login"""
+        self.client.login(username='testuser', password='testpass123')
+        url = reverse('book-create')
+        data = {
+            'title': 'Login Book',
+            'publication_year': 2022,
+            'author': self.author.pk
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
     def test_book_create_unauthenticated(self):
         """Test that unauthenticated users cannot create books"""
         url = reverse('book-create')
