@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Django Blog{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'blog/styles.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <h1>Welcome to the Django Blog</h1>
