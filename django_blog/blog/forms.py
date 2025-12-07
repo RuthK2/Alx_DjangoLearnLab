@@ -23,13 +23,15 @@ class EditProfileForm(forms.ModelForm):
         fields = ('username', 'email', 'first_name', 'last_name')
 
 from .models import Post
+from taggit.forms import TagWidget
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']
         widgets = {
             'content': forms.Textarea(attrs={'rows': 4, 'cols': 50}),
+            'tags': TagWidget(),
         }
 
 class CommentForm(forms.ModelForm):
