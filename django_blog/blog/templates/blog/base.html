@@ -13,6 +13,7 @@
     <p>This is my First Post</p>
     <header>
         <nav>
+            
             <ul>
                 <li><a href="#">Home</a></li>
                 <li><a href="#">Blog Posts</a></li>
@@ -20,6 +21,11 @@
                 <li><a href="#">Register</a></li>
             </ul>
         </nav>
+        <form action="{% url 'search' %}" method="get" class="search-form">
+            <input type="text" name="q" placeholder="Search posts..." value="{{ request.GET.q }}">
+            <button type="submit">Search</button>
+        </form>
+
     </header>
 
     <div class="content">

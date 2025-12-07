@@ -4,11 +4,22 @@
 {% block content %}
 <h2>Latest Posts</h2>
 
+{% if tag %}
+<h3>Posts tagged with "{{ tag }}"</h3>
+{% endif %}
+
 {% for post in posts %}
     <article>
         <h3><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h3>
         <p>{{ post.content|truncatechars:150 }}</p>
         <p>By {{ post.author }} on {{ post.published_date }}</p>
+        {% if post.tags.all %}
+            <p>Tags: 
+            {% for tag in post.tags.all %}
+                <a href="{% url 'posts-by-tag' tag.name %}">#{{ tag.name }}</a>
+            {% endfor %}
+            </p>
+        {% endif %}
     </article>
     <hr>
 {% empty %}

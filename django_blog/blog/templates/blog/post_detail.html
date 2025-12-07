@@ -16,6 +16,14 @@
 
 <a href="{% url 'post-list' %}" class="btn">Back to Posts</a>
 
+{% if post.tags.all %}
+<p>Tags: 
+{% for tag in post.tags.all %}
+    <a href="{% url 'posts-by-tag' tag.name %}" class="btn">#{{ tag.name }}</a>
+{% endfor %}
+</p>
+{% endif %}
+
 <hr>
 <h3>Comments</h3>
 
