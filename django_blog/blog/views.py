@@ -4,16 +4,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .forms import CustomUserCreationForm, EditProfileForm, PostForm
-from .models import Post
+from .forms import CustomUserCreationForm, EditProfileForm, PostForm, CommentForm
+from .models import Post, Comment
+
+class AuthorRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
 
 def home(request):
-    return render(request,'blog/base.html')
+    return render(request, 'blog/base.html')
+
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
@@ -48,26 +54,18 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('post-detail', kwargs={'pk': self.object.pk})
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, AuthorRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_form.html'
     
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
-    
     def get_success_url(self):
         return reverse_lazy('post-detail', kwargs={'pk': self.object.pk})
 
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class PostDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
     success_url = reverse_lazy('post-list')
-    
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
 
 @login_required
 def profile(request):
@@ -80,6 +78,7 @@ def logout_view(request):
 
 @login_required
 def edit_profile(request):
+    template_name = 'blog/edit_profile.html'
     if request.method == 'POST':
         form = EditProfileForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -87,6 +86,42 @@ def edit_profile(request):
             return redirect('profile')
     else:
         form = EditProfileForm(instance=request.user)
-    return render(request, 'blog/edit_profile.html', {'form': form})
+    return render(request, template_name, {'form': form})
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.kwargs['pk']})
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+    
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+    
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+    
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+    
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
 
 
