@@ -5,20 +5,21 @@ from django.urls import reverse
 class EditProfileTestCase(TestCase):
     def setUp(self):
         self.client = Client()
+        self.test_password = 'testpass123'
         self.user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='testpass123'
+            password=self.test_password
         )
     
     def test_edit_profile_get(self):
-        self.client.login(username='testuser', password='testpass123')
+        self.client.login(username='testuser', password=self.test_password)
         response = self.client.get(reverse('edit_profile'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'csrfmiddlewaretoken')
     
     def test_edit_profile_post(self):
-        self.client.login(username='testuser', password='testpass123')
+        self.client.login(username='testuser', password=self.test_password)
         response = self.client.post(reverse('edit_profile'), {
             'username': 'updateduser',
             'email': 'updated@example.com',
