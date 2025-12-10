@@ -65,8 +65,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         if self.action in ['update', 'partial_update', 'destroy']:
             return Comment.objects.filter(author=self.request.user)
         return Comment.objects.all()
+    
+class FeedViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Post.objects.none()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
-
-        
-
-
+    def get_queryset(self):
+        user = self.request.user
+        followed_users = user.following.all()
+        return Post.objects.filter(author__in=followed_users).order_by('-created_at')    

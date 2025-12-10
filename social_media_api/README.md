@@ -1,172 +1,345 @@
-# Social Media API
+# Social Media API Documentation
 
-A Django REST Framework-based social media API with user authentication and profile management.
+## Overview
+A Django REST API for a social media platform with user authentication, posts, comments, follow functionality, and personalized feeds.
 
-## Setup Process
+## Features
+- User registration and authentication
+- Create, read, update, delete posts and comments
+- Follow/unfollow users
+- Personalized feed based on followed users
+- Search, filtering, and pagination
 
-### 1. Install Dependencies
+## Model Changes
 
-```bash
-pip install django djangorestframework
+### CustomUser Model
+The user model has been updated to support follow functionality:
+
+```python
+class CustomUser(AbstractUser):
+    bio = models.TextField(max_length=500, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    followers = models.ManyToManyField('self', symmetrical=False, related_name='following')
 ```
 
-### 2. Run Migrations
+**Key Changes:**
+- Added `followers` field: Many-to-many relationship to self
+- `symmetrical=False`: Following is not mutual by default
+- `related_name='following'`: Provides reverse relationship
 
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-### 3. Start Development Server
-
-```bash
-python manage.py runserver
-```
-
-The API will be available at `http://127.0.0.1:8000/`
+**Relationship Usage:**
+- `user.followers.all()` - Get users who follow this user
+- `user.following.all()` - Get users this user follows
 
 ## API Endpoints
 
-### Base URL
-All endpoints are prefixed with `/api/`
-
 ### Authentication Endpoints
 
-#### 1. Register User
-- **URL**: `/api/register/`
-- **Method**: `POST`
-- **Auth Required**: No
-- **Request Body**:
+#### Register User
+```
+POST /api/accounts/register/
+```
+**Body:**
 ```json
 {
-    "username": "john",
-    "email": "john@example.com",
-    "password": "securepass123"
+    "username": "newuser",
+    "email": "user@example.com",
+    "password": "securepassword123"
 }
 ```
-- **Success Response** (201):
+**Response:**
 ```json
 {
     "message": "User created successfully",
-    "token": "abc123def456..."
+    "token": "your_auth_token_here"
 }
 ```
 
-#### 2. Login
-- **URL**: `/api/login/`
-- **Method**: `POST`
-- **Auth Required**: No
-- **Request Body**:
+#### Login
+```
+POST /api/accounts/login/
+```
+**Body:**
 ```json
 {
-    "username": "john",
-    "password": "securepass123"
+    "username": "newuser",
+    "password": "securepassword123"
 }
 ```
-- **Success Response** (200):
+**Response:**
 ```json
 {
     "message": "Login successful",
-    "token": "abc123def456..."
+    "token": "your_auth_token_here"
 }
 ```
 
-#### 3. Get Profile
-- **URL**: `/api/profile/`
-- **Method**: `GET`
-- **Auth Required**: Yes
-- **Headers**: `Authorization: Token YOUR_TOKEN_HERE`
-- **Success Response** (200):
+#### Get Profile
+```
+GET /api/accounts/profile/
+```
+**Headers:** `Authorization: Token your_auth_token_here`
+
+### Follow Management Endpoints
+
+#### Follow User
+```
+POST /api/accounts/follow/<user_id>/
+```
+**Headers:** `Authorization: Token your_auth_token_here`
+
+**Example:**
+```bash
+POST /api/accounts/follow/2/
+Authorization: Token abc123def456
+```
+
+**Success Response:**
 ```json
 {
-    "id": 1,
-    "username": "john",
-    "email": "john@example.com",
-    "first_name": "",
-    "last_name": "",
-    "bio": "",
-    "profile_picture": null,
-    "followers": []
+    "message": "You are now following john"
 }
 ```
 
-## How to Register and Authenticate Users
+**Error Responses:**
+- **400 Bad Request:** Self-follow attempt
+```json
+{
+    "error": "You cannot follow yourself"
+}
+```
+- **404 Not Found:** User doesn't exist
+```json
+{
+    "error": "User not found"
+}
+```
 
-### Using Postman
+#### Unfollow User
+```
+POST /api/accounts/unfollow/<user_id>/
+```
+**Headers:** `Authorization: Token your_auth_token_here`
 
-#### Register a New User:
-1. Create a POST request to `http://127.0.0.1:8000/api/register/`
-2. Set header: `Content-Type: application/json`
-3. Add JSON body with username, email, and password
-4. Send request and save the returned token
-
-#### Login:
-1. Create a POST request to `http://127.0.0.1:8000/api/login/`
-2. Set header: `Content-Type: application/json`
-3. Add JSON body with username and password
-4. Send request and save the returned token
-
-#### Access Protected Endpoints:
-1. Add header: `Authorization: Token YOUR_TOKEN_HERE`
-2. Make requests to protected endpoints like `/api/profile/`
-
-### Using cURL
-
+**Example:**
 ```bash
-# Register
-curl -X POST http://127.0.0.1:8000/api/register/ \
-  -H "Content-Type: application/json" \
-  -d '{"username":"john","email":"john@example.com","password":"securepass123"}'
-
-# Login
-curl -X POST http://127.0.0.1:8000/api/login/ \
-  -H "Content-Type: application/json" \
-  -d '{"username":"john","password":"securepass123"}'
-
-# Get Profile
-curl -X GET http://127.0.0.1:8000/api/profile/ \
-  -H "Authorization: Token YOUR_TOKEN_HERE"
+POST /api/accounts/unfollow/2/
+Authorization: Token abc123def456
 ```
 
-## User Model Overview
-
-### CustomUser Model
-Extends Django's `AbstractUser` with additional fields:
-
-**Fields:**
-- `username` (inherited) - Unique username for login
-- `email` (inherited) - User's email address
-- `password` (inherited) - Hashed password
-- `first_name` (inherited) - User's first name
-- `last_name` (inherited) - User's last name
-- `bio` - Text field for user biography (max 500 characters, optional)
-- `profile_picture` - Image field for profile photo (optional)
-- `followers` - ManyToMany relationship to self for follower system (non-symmetrical)
-
-**Key Features:**
-- Token-based authentication using Django REST Framework's TokenAuthentication
-- Secure password hashing
-- Support for social media features (bio, profile picture, followers)
-- Extensible for additional social media functionality
-
-## Project Structure
-
-```
-social_media_api/
-├── accounts/
-│   ├── models.py          # CustomUser model
-│   ├── serializers.py     # DRF serializers
-│   ├── views.py           # API views
-│   └── urls.py            # App URL patterns
-├── social_media_api/
-│   ├── settings.py        # Project settings
-│   └── urls.py            # Main URL configuration
-└── manage.py
+**Success Response:**
+```json
+{
+    "message": "You have unfollowed john"
+}
 ```
 
-## Security Notes
+**Error Responses:**
+- **400 Bad Request:** Self-unfollow attempt
+```json
+{
+    "error": "You cannot unfollow yourself"
+}
+```
+- **404 Not Found:** User doesn't exist
+```json
+{
+    "error": "User not found"
+}
+```
 
-- Passwords are automatically hashed using Django's password hashers
-- Token authentication is required for protected endpoints
-- CSRF protection is enabled
-- Change `SECRET_KEY` and set `DEBUG = False` in production
+### Feed Endpoint
+
+#### Get Personalized Feed
+```
+GET /api/feed/
+```
+**Headers:** `Authorization: Token your_auth_token_here`
+
+**Features:**
+- Shows posts only from users you follow
+- Ordered by creation date (newest first)
+- Paginated results (10 posts per page)
+- Read-only access (no create/update/delete)
+
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `page_size`: Posts per page (default: 10, max: 100)
+
+**Example:**
+```bash
+GET /api/feed/?page=1&page_size=5
+Authorization: Token abc123def456
+```
+
+**Response:**
+```json
+{
+    "count": 25,
+    "next": "http://127.0.0.1:8000/api/feed/?page=2&page_size=5",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "title": "Latest Post",
+            "content": "This is a post from someone I follow",
+            "author": {
+                "id": 2,
+                "username": "john"
+            },
+            "created_at": "2024-01-15T10:30:00Z",
+            "updated_at": "2024-01-15T10:30:00Z"
+        }
+    ]
+}
+```
+
+### Posts Endpoints
+
+#### Create Post
+```
+POST /api/posts/
+```
+**Headers:** `Authorization: Token your_auth_token_here`
+**Body:**
+```json
+{
+    "title": "My New Post",
+    "content": "This is the content of my post"
+}
+```
+
+#### Get Posts (with filtering and search)
+```
+GET /api/posts/
+```
+**Query Parameters:**
+- `search`: Search in title and content
+- `author`: Filter by author ID
+- `created_at`: Filter by creation date
+- `ordering`: Order by fields (created_at, updated_at, title)
+- `page`: Page number
+- `page_size`: Posts per page
+
+**Examples:**
+```bash
+# Search posts
+GET /api/posts/?search=django
+
+# Filter by author
+GET /api/posts/?author=1
+
+# Order by creation date (newest first)
+GET /api/posts/?ordering=-created_at
+
+# Combine filters
+GET /api/posts/?author=1&search=tutorial&ordering=-created_at
+```
+
+## Testing with Postman
+
+### 1. Setup
+1. Start Django server: `python manage.py runserver`
+2. Base URL: `http://127.0.0.1:8000`
+
+### 2. Authentication Flow
+1. Register or login to get authentication token
+2. Add token to all protected endpoints: `Authorization: Token your_token`
+
+### 3. Follow Functionality Test Sequence
+
+**Step 1: Login as User 1**
+```
+POST /api/accounts/login/
+{
+    "username": "testuser",
+    "password": "your_password"
+}
+```
+
+**Step 2: Follow Another User**
+```
+POST /api/accounts/follow/2/
+Authorization: Token user1_token
+```
+
+**Step 3: Create Posts as User 2**
+```
+POST /api/posts/
+Authorization: Token user2_token
+{
+    "title": "Test Post",
+    "content": "Hello followers!"
+}
+```
+
+**Step 4: Check Feed as User 1**
+```
+GET /api/feed/
+Authorization: Token user1_token
+```
+
+**Step 5: Unfollow User**
+```
+POST /api/accounts/unfollow/2/
+Authorization: Token user1_token
+```
+
+**Step 6: Verify Feed is Empty**
+```
+GET /api/feed/
+Authorization: Token user1_token
+```
+
+## Error Handling
+
+### Common HTTP Status Codes
+- **200 OK:** Successful GET request
+- **201 Created:** Successful POST request
+- **400 Bad Request:** Invalid data or self-follow attempt
+- **401 Unauthorized:** Missing or invalid authentication
+- **404 Not Found:** Resource doesn't exist
+- **500 Internal Server Error:** Server error
+
+### Authentication Errors
+All protected endpoints require authentication:
+```json
+{
+    "detail": "Authentication credentials were not provided."
+}
+```
+
+## Security Features
+- Token-based authentication
+- Permission-based access control
+- Self-follow/unfollow prevention
+- User isolation (users can only modify their own content)
+
+## Database Relationships
+```
+CustomUser
+├── followers (ManyToMany to self)
+├── following (reverse relation)
+├── authored_posts (reverse relation to Post)
+└── authored_comments (reverse relation to Comment)
+
+Post
+├── author (ForeignKey to CustomUser)
+└── comments (reverse relation)
+
+Comment
+├── author (ForeignKey to CustomUser)
+└── post (ForeignKey to Post)
+```
+
+## Installation & Setup
+1. Install dependencies: `pip install -r requirements.txt`
+2. Run migrations: `python manage.py migrate`
+3. Create superuser: `python manage.py createsuperuser`
+4. Start server: `python manage.py runserver`
+
+## API Testing Script
+Use the provided `test_api.py` script for basic endpoint testing:
+```bash
+python test_api.py
+```
