@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .models import *
 from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
@@ -69,10 +69,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 class FeedViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.none()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         user = self.request.user
-        followed_users = user.following.all()
-        return Post.objects.filter(author__in=followed_users).order_by('-created_at')    
+        following_users = user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')    
