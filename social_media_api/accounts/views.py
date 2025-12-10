@@ -11,11 +11,17 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
+        # Validate input data to prevent path traversal
+        data = request.data.copy()
+        for field in ['username', 'email', 'first_name', 'last_name']:
+            if field in data and isinstance(data[field], str):
+                data[field] = data[field].replace('/', '').replace('\\', '').replace('..', '')
+        
+        serializer = RegisterSerializer(data=data)
         if serializer.is_valid():
-            user = serializer.save()
-            token = Token.objects.create(user=user)
-            return Response({'message': 'User created successfully', 'token': token.key}, 
+         user = serializer.save()
+         token = Token.objects.create(user=user)
+         return Response({'message': 'User created successfully', 'token': token.key}, 
                             status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -57,6 +63,9 @@ class FollowUserView(APIView):
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found'},
                             status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': 'Failed to follow user'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
        
     
 class UnfollowUserView(APIView):
@@ -75,11 +84,7 @@ class UnfollowUserView(APIView):
             return Response({'error': 'User not found'},
                             status=status.HTTP_404_NOT_FOUND)
 
-class UserListView(generics.GenericAPIView):
+class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
-    
-    def get(self, request):
-        users = CustomUser.objects.all()
-        serializer = self.get_serializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    queryset = CustomUser.objects.all()

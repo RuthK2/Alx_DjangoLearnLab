@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -10,8 +11,8 @@ User = get_user_model()
 
 class PostModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.post = Post.objects.create(
+     self.user = User.objects.create_user(username='testuser', password='testpass')
+     self.post = Post.objects.create(
             title='Test Post',
             content='Test content',
             author=self.user
@@ -29,9 +30,9 @@ class PostModelTest(TestCase):
 
 class CommentModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.post = Post.objects.create(title='Test Post', content='Test content', author=self.user)
-        self.comment = Comment.objects.create(
+     self.user = User.objects.create_user(username='testuser', password='testpass')
+     self.post = Post.objects.create(title='Test Post', content='Test content', author=self.user)
+     self.comment = Comment.objects.create(
             content='Test comment',
             author=self.user,
             post=self.post
@@ -49,8 +50,8 @@ class CommentModelTest(TestCase):
 
 class PostAPITest(APITestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='pass1')
-        self.user2 = User.objects.create_user(username='user2', password='pass2')
+        self.user1 = User.objects.create_user(username='user1', password=make_password('testpass123'))
+        self.user2 = User.objects.create_user(username='user2', password=make_password('testpass123'))
         self.post = Post.objects.create(title='Test Post', content='Test content', author=self.user1)
 
     def test_get_posts_list(self):
@@ -96,6 +97,7 @@ class PostAPITest(APITestCase):
         url = reverse('post-list')
         response = self.client.get(url, {'search': 'Test'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)
         self.assertEqual(len(response.data['results']), 1)
 
     def test_filter_posts_by_author(self):
@@ -114,8 +116,8 @@ class PostAPITest(APITestCase):
 
 class CommentAPITest(APITestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(username='user1', password='pass1')
-        self.user2 = User.objects.create_user(username='user2', password='pass2')
+        self.user1 = User.objects.create_user(username='user1', password=make_password('testpass123'))
+        self.user2 = User.objects.create_user(username='user2', password=make_password('testpass123'))
         self.post = Post.objects.create(title='Test Post', content='Test content', author=self.user1)
         self.comment = Comment.objects.create(content='Test comment', author=self.user1, post=self.post)
 

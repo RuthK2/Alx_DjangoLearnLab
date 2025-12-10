@@ -73,6 +73,9 @@ class FeedViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        user = self.request.user
-        following_users = user.following.all()
-        return Post.objects.filter(author__in=following_users).order_by('-created_at')    
+        try:
+            user = self.request.user
+            following_users = user.following.all()
+            return Post.objects.filter(author__in=following_users).order_by('-created_at')
+        except AttributeError:
+            return Post.objects.none()    
