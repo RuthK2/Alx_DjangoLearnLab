@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'posts',
     'django_filters',
+    'notifications'
 ]
 
 MIDDLEWARE = [
@@ -153,7 +154,6 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.UserRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',
-    ]
-    
+    ],
 }
 
