@@ -114,15 +114,12 @@ if not DB_PASSWORD:
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'social_media_db'),
-        'USER': os.environ.get('DB_USER', 'root'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': DB_PASSWORD,
         'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
