@@ -88,3 +88,13 @@ class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
     queryset = CustomUser.objects.all()
+
+class UserDetailView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    queryset = CustomUser.objects.all()
+    
+    def get(self, request, pk):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
